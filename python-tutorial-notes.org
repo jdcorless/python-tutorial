@@ -1,0 +1,503 @@
+#+TITLE: Notes from the Python 3.4.2 Tutorial
+#+AUTHOR: John D. Corless
+#+OPTIONS: html-link-use-abs-url:nil html-postamble:auto
+#+OPTIONS: html-preamble:t html-scripts:t html-style:t
+#+OPTIONS: html5-fancy:nil tex:t
+#+CREATOR: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.4.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)
+#+HTML_CONTAINER: div
+#+HTML_DOCTYPE: xhtml-strict
+#+INFOJS_OPT: view:t toc:t ltoc:t mouse:underline buttons:0 path:http://thomasf.github.io/solarized-css/org-info.min.js
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="http://thomasf.github.io/solarized-css/solarized-light.min.css" />
+#+HTML_HEAD_EXTRA:
+#+HTML_LINK_HOME:
+#+HTML_LINK_UP:
+#+HTML_MATHJAX:
+#+LATEX_HEADER:
+
+These are my notes from the official Python tutorial for version 3.4.2.  They are not intended to be complete, because the tutorial is readily available, but it helps my memory to write this down and serves as a more personal reference for me.  A couple things to note...
+
+- In some cases I have copied sentences directly from the tutorial
+- The org-mode notes have some extra information that I chose not to export
+
+** Whetting Your Appetite
+Describes advantages of Python for various applications.
+The following shows that we are using Python 3.4.2.
+#+BEGIN_SRC python :results output :exports both
+import sys
+print(sys.version)
+#+END_SRC
+
+#+RESULTS:
+: 3.4.2 |Continuum Analytics, Inc.| (default, Oct 21 2014, 17:40:08) 
+: [GCC 4.4.7 20120313 (Red Hat 4.4.7-1)]
+
+** Using the Python Interpreter
+From the module =sys=, the =sys.argv= variable carries info passed when the python command was invoked.
+The zeroth argument has different values depending on how it was called.
+#+BEGIN_SRC python :results output :exports none
+import sys
+for c,i in enumerate(sys.argv):
+    print(c,i)
+#+END_SRC
+
+#+RESULTS:
+: (0, '')
+
+Continuation lines show up as =...= in the interactive shell.
+Here is the example used but without this symbol because we are in Emacs.
+#+BEGIN_SRC python :results output :exports none
+the_world_is_flat = True
+if the_world_is_flat:
+    print("Be careful not to fall off!")
+#+END_SRC
+
+#+RESULTS:
+: Be careful not to fall off!
+
+By default, Python source code files are treated as UTF-8.
+To use something other than this default, put a comment such as the following at the top of the script file (1st or 2nd line allowed) =# -*- coding: cp-1252 -*-=.
+
+** An Informal Introduction to Python
+Python comments begin with a =#=, such that all input on the line after this mark are ignored.
+Division in Python3 always returns a float (not true of Python2).
+*Floor Division* (discard the fractional part) with the =//= operation.
+Raise a number to a power with =**= operator (and note that =**= has higher precendence than =-= so =-3**2= evaluates to =-9=).
+Assignment operator is ===.
+#+BEGIN_SRC python :results output :exports both
+print('Example of integer math is 2+2 = ', 2+2)
+print('Example of Python3 division is 8/5 =', 8/5)
+print('Integer part of 8/5 is', 8//5) # Here is // operator
+print('Remainder of 8/5 is', 8 % 5)
+print('Fractional part of 8/5 is', (8%5)/5)
+print('2 to the 3 power is', 2**3)
+#+END_SRC
+
+#+RESULTS:
+: Example of integer math is 2+2 =  4
+: Example of Python3 division is 8/5 = 1.6
+: Integer part of 8/5 is 1
+: Remainder of 8/5 is 3
+: Fractional part of 8/5 is 0.6
+: 2 to the 3 power is 8
+
+In interactive mode, the last printed expression is assigned to the variable =_=.
+In addition to int and float, Python supports other types of numbers, such as Decimal and Fraction.
+-------
+The *Decimal* type is an implementation of "fast correctly-rounded floating point arithmetic".
+Some references are the [[http://speleotrove.com/decimal/decarith.html][IBM's General Decimal Arithmetic Specification]] and the [[http://754r.ucbtest.org/standards/854.pdf][IEEE standard 854-1987]].
+I haven't researched this too much, but here is an illustrative example.
+#+BEGIN_SRC python :results output :exports both
+from decimal import *
+a = 1.1+2.2 # standard float math
+b = Decimal(1.1) + Decimal(2.2) # Conv from float is exact val of float
+c = Decimal('1.1') + Decimal('2.2') # Conversion from str is that val
+print('getcontext() =', getcontext())
+print('Standard precision of Decimal module =',getcontext().prec)
+print('Now look at 1.1 + 2.2 in a few different methods')
+print('Result of float math =',a)
+print('Result of Decimal conv of float =',b)
+print('Result of Decimal conv of str =',c)
+#+END_SRC
+
+#+RESULTS:
+: getcontext() = Context(prec=28, rounding=ROUND_HALF_EVEN, Emin=-999999, Emax=999999, capitals=1, clamp=0, flags=[Inexact, FloatOperation, Rounded], traps=[InvalidOperation, DivisionByZero, Overflow])
+: Standard precision of Decimal module = 28
+: Now look at 1.1 + 2.2 in a few different methods
+: Result of float math = 3.3000000000000003
+: Result of Decimal conv of float = 3.300000000000000266453525910
+: Result of Decimal conv of str = 3.3
+
+-------
+The *Fraction* type provides for rational number arithmetic.
+#+BEGIN_SRC python :results output :exports both
+from fractions import Fraction
+print(Fraction(1,5)*Fraction(2,7))
+print(Fraction(16, -10))
+from decimal import Decimal
+print(Fraction(Decimal('1.1')))
+#+END_SRC
+
+#+RESULTS:
+: 2/35
+: -8/5
+: 11/10
+
+Python also has built-in support for complex numbers, and uses the j or J suffix to indicate the imaginary part (e.g. 3+5j).
+-------
+*Strings* can be enclosed in single =​'​= or double =​"​= quotes with the same result.
+The symbol =\= can be used to escape quote symbols (or other special characters).
+The control character =\n= is used for new lines as in =​'First line.\nSecond line.'​=.
+If you don't want characters prefaced by =\= to be interpreted as special characters you can use /raw strings/ by adding the =r= before the first quote, as in...
+#+BEGIN_SRC python :results output :exports both
+print('C:\some\name')
+print('<-----######----->')
+print(r'C:\some\name')
+#+END_SRC
+
+#+RESULTS:
+: C:\some
+: ame
+: <-----######----->
+: C:\some\name
+
+String literals can span multiple lines with triple quotes, single =​'​= or double =​"​=. End of lines are automatically included unless the =\= character is used to indicate line continuation.
+#+BEGIN_SRC python :results output :exports both
+print('''\
+Usage: thingy [OPTIONS]
+     -h                        Display this usage message
+     -H hostname               Hostname to connect to
+''')
+#+END_SRC
+
+#+RESULTS:
+: Usage: thingy [OPTIONS]
+:      -h                        Display this usage message
+:      -H hostname               Hostname to connect to
+: 
+
+Strings can be concatenated with the =*= and =+= operator, or just with a space (only works with literals, and is useful for breaking long strings).
+#+BEGIN_SRC python :results output :exports both
+print(3*'Ho, ' + 'Green Giant!')
+print('Hi' 'Ho!')
+text = ('Four score and seven years ago, '
+        'our fathers brought forth ... a new nation')
+print(text)
+#+END_SRC
+
+#+RESULTS:
+: Ho, Ho, Ho, Green Giant!
+: HiHo!
+: Four score and seven years ago, our fathers brought forth ... a new nation
+
+Strings can be indexed with the first character having index 0.
+There is no character type (i.e. a character is a string of size one).
+Ranges can be specified as =[n:m]= where the =nth= element is always included and the =mth= is always excluded.
+This makes sure that =s[:i] + s[i:]= always equals =s=.
+If the 1st index is omitted it defaults to zero and if the 2nd index is omitted it defaults to the size of the string being sliced.
+#+BEGIN_SRC python :results output :exports both
+word = 'Python'
+print('1. String is \'' + word + '\'')
+print('2. First character is', word[0])
+print('3. Sixth character is', word[5])
+print('4. Last character is', word[-1])
+print('5. Second-to-last character is', word[-2])
+print('6. Second through fourth characters are', word[1:4])
+print('7. ' + word[:2] + word[2:])
+#+END_SRC
+
+#+RESULTS:
+: 1. String is 'Python'
+: 2. First character is P
+: 3. Sixth character is n
+: 4. Last character is n
+: 5. Second-to-last character is o
+: 6. Second through fourth characters are yth
+: 7. Python
+
+One way to understand slicing is to think of the indices pointing in /between/ characters.
+The =i:j= slice consists of characters between the edges labelled =i= and =j=.
+#+BEGIN_EXAMPLE
+ +---+---+---+---+---+---+
+ | P | y | t | h | o | n |
+ +---+---+---+---+---+---+
+ 0   1   2   3   4   5   6
+-6  -5  -4  -3  -2  -1
+#+END_EXAMPLE
+Python strings cannot be changed, they are *immutable*. So, for instance, =​word[0] = 'a'​= will not work. 
+=len()= returns the length of a string (and lists).
+[[https://docs.python.org/3.4/library/stdtypes.html#string-methods][/String methods/]] are available, for example, as =word.lower()=, or =word.capitalize()=.
+The =printf()= style formatting is [[https://docs.python.org/3.4/library/stdtypes.html#old-string-formatting][available]] but can lead to errors, e.g. with tuples.
+The newer [[https://docs.python.org/3.4/library/stdtypes.html#str.format][=str.format()=]] method avoids these errors and provides a more powerful approach.
+
+-------
+
+Python has several compound data types, perhaps the most versatile being *Lists*, which are written as comma separated values.  Like strings (and all other built-in sequence types), lists can be indexed and sliced.
+Lists are also mutable, and so can be modified.
+
+#+BEGIN_SRC python :results output :exports both
+squares = [1, 4, 9, 24]
+print('Squares with error =', squares)
+squares[3] = 25    # Lists are mutable
+print('Corrected squares  =', squares)
+squares.append(36) # Append a value to list
+print('Appended squares   =', squares)
+squares[1:3] = ['aa', 'bb']
+print('Slice assgined     =',squares)
+#+END_SRC
+
+#+RESULTS:
+: Squares with error = [1, 4, 9, 24]
+: Corrected squares  = [1, 4, 9, 25]
+: Appended squares   = [1, 4, 9, 25, 36]
+: Slide assgined     = [1, 'aa', 'bb', 25, 36]
+
+Lists can also be nested to create lists of lists. 
+-------
+*First Steps Towards Programming*
+At this point the tutorial gives a simple example for computing the Fibonacci sequence that highlights some elements of Python programming.
+#+BEGIN_SRC python :results output :exports both
+# Fibonacci series:
+# the sum of two elements defines the next
+a, b = 0, 1
+while b < 10:
+    print(b,end=', ')
+    a, b = b, a+b
+#+END_SRC
+
+#+RESULTS:
+: 1, 1, 2, 3, 5, 8, 
+
+- /Multiple assignment/ is shown where multiple variables simultaneously are assigned new values. The right-hand side is evaluated first (from left-to-right) and then assignment takes place.
+- The =while= loops executes as long as the condition is true.  Like =C=, any non-zero integer value is true, zero is false.  A string, list, or any sequence can be used and will evaluate to True unless it is of zero length. The standard comparison operators (=<=, =>=, =<=​=, =>=​=, =​==​=, and =!=​=).
+- The /body/ of the =while= loop is indented, which is Python's way of grouping statements.  Each line in a basic block must be identically indented.
+- 
+** More Control Flow Tools
+Perhaps the most well known statement is the *if* statement.
+There can be zero or more =elif= parts and the =else= is optional.
+The =if...elif...elif= construct is a substitute for =case= and =switch= in other languages.
+#+BEGIN_SRC python :results output :exports both
+#x = int(input("Please enter an integer: "))
+x = -1
+if x < 0:
+    x = 0
+    print('Negative changed to zero')
+elif x == 0:
+    print('Zero')
+elif x == 1:
+    print('Single')
+else:
+    print('More')
+#+END_SRC
+
+#+RESULTS:
+: Negative changed to zero
+
+Note that the above illustrates that at most one of the group of
+statements is executed.
+When the =if= is entered =x= is =-1=, and while
+its value is changed to =0= the flow does not enter the =​x=0​= group.
+-------
+The *for* statement in Python is somewhat different than other languages in that Python allows the user to iterate over the items of any sequence.
+
+#+BEGIN_SRC python :results output :exports both
+# Measure some strings:
+words = ['cat', 'window', 'defenestrate']
+for w in words:
+    print(w, len(w), end=', ')
+#+END_SRC
+
+#+RESULTS:
+: cat 3, window 6, defenestrate 12, 
+
+If you need to change an item in a sequence that you are iterating over, it is recommended that you iterate over a copy, which can be done with the simple =[:]= notation.
+#+BEGIN_SRC python :results output :exports both
+words = ['cat', 'window', 'defenestrate']
+for w in words[:]:
+    if len(w) > 6:
+        words.insert(0, w)
+print(words)
+#+END_SRC
+
+#+RESULTS:
+: ['defenestrate', 'cat', 'window', 'defenestrate']
+
+Note that the =list.insert(idx,item)= inserts =item= into =list= before index =idx=.
+
+Alternatively you can iterate using the =range= function if you need to iterate over a sequence of numbers (=for i in range(7)= as an example).
+Note that =range(7)= generates 7 values from 0 to 6 (which are the legal indices for a sequence of length 7).
+And =range(5,10)= will create a list from 5 to 9, while =range(0,10,3)= will have the range start at 0 and go up to 9 (max) in steps of 3.
+The =range= function creates an object of type =range= which is not a list (to save space) but returns successive items in the sequence when you iterate over it.
+We say that such an object is an /iterable/ which can be used by /iterators/ like the =for= statement.
+The [[https://docs.python.org/3.4/library/functions.html#enumerate][enumerate]] function allows looping over a sequence while also creating an index over that sequence.
+
+-------
+The =break= statement breaks out of the smallest enclosing =for= or =while= loop.
+Loop statements may have an =else= clause that is executed when the loop terminates through exhaustion of the list (=for=) or when the condition becomes false (=while=), but not when looping is terminated with a =break=.
+In the code below, the =break= statement breaks out of the enclosing =for= loop when =n= is divisible by =x= (i.e. not prime), and the =else= statement is executed if the =for= loop exhausts its iterable.
+
+#+BEGIN_SRC python :results output :exports both
+for n in range(2, 10):
+    for x in range(2, n):
+        if n % x == 0:
+            print(n, 'equals', x, '*', n//x)
+            break
+    else:
+        # loop fell through without finding a factor
+        print(n, 'is a prime number')
+#+END_SRC
+
+#+RESULTS:
+: 2 is a prime number
+: 3 is a prime number
+: 4 equals 2 * 2
+: 5 is a prime number
+: 6 equals 2 * 3
+: 7 is a prime number
+: 8 equals 2 * 4
+: 9 equals 3 * 3
+
+When used with a =for= or =while= loop, the =else= clause has more in common with the =else= clause of a =try= statement which runs when control flows off the end of the =try= (except in the case of an exception, =return=, =continue=, or =break=).
+
+-------
+The =pass= statement does nothing, but can be used when a statement is required syntatically but the program requires no action.
+An example is in creating minimal classes, or as a reminder to implement some code later.
+#+BEGIN_SRC python
+class MyEmptyClass:
+    pass
+def initlog(*args):
+    pass # Remember to implement this!
+#+END_SRC
+
+#+RESULTS:
+: None
+
+-------
+We use the keyword =def= in *Defining Functions*.
+It must be followed by the function name and the parenthesized list of formal parameters.
+The function body follows and is indented.
+The first statement in the function body can optionally be a string literal, which serves as the function's [[https://docs.python.org/3.4/tutorial/controlflow.html#tut-docstrings][documentation string]] or /docstring/.
+- First line should be short, concise summary, starting with a capital letter, ending with a period, and not using function name.
+- If more than one line, 2nd line is blank to visually separate.
+- This second section should be one or more paragraphs describing calling conventions, side effects, etc.
+- The Python parser does not strip indentation from multi-line string literals
+- The following shows the convention for indentation.
+#+BEGIN_SRC python :results output :exports both
+def my_function():
+    """Do nothing, but document it.
+
+    No, really, it doesn't do anything.
+    """
+    pass
+print(my_function.__doc__)
+#+END_SRC
+
+#+RESULTS:
+: Do nothing, but document it.
+: 
+:     No, really, it doesn't do anything.
+
+And here is an example function we will use.
+#+BEGIN_SRC python :results output :exports both
+def fib(n):    # write Fibonacci series up to n
+    """Print a Fibonacci series up to n."""
+    a, b = 0, 1
+    while a < n:
+        print(a, end=' ')
+        a, b = b, a+b
+    print()
+
+# Now call the function we just defined:
+fib(2000)
+#+END_SRC
+
+#+RESULTS:
+: 0 1 1 2 3 5 8 13 21 34 55 89 144 233 377 610 987 1597 
+
+The execution of a function introduces a new symbol table used for local variables of the function.
+Variable references first look in local symbol table, then local symbol tables of enclosing functions, then global symbol table, and finally in table of built-in names (sometimes called the LEGB rule for Local, Enclosing, Global, and Built-in).
+The function arguments are introduced to the local symbol table when the function is called.
+Arguments are passed by object reference, so if the object is mutable (e.g. dictionaries, lists) it is subject to change by the function, but if it is immutable (e.g. numbers, strings, tuples) it will not change.
+
+#+BEGIN_SRC python :results output :exports both
+a = 1 # ints are immutable
+def f(x):
+    x = 10
+f(a)
+print(a) # did not change
+a = [1,2] # lists are mutable
+def f(x):
+    x.append('New')
+f(a)
+print(a) # Changed
+#+END_SRC
+
+#+RESULTS:
+: 1
+: [1, 2, 'New']
+
+From the [[https://docs.python.org/3.4/reference/datamodel.html][Data Model]] reference, /objects/ in Python are abstractions for data.
+Every object has an identity (think of like an address in memory), a type, and a value.
+
+#+BEGIN_SRC python :results output :exports both
+a = 10
+print('identity =',id(a),', type =',type(a),', and value =',a)
+a = (1,2,3)
+print('identity =',id(a),', type =',type(a),', and value =',a)
+#+END_SRC
+
+#+RESULTS:
+: identity = 3077931696 , type = <class 'int'> , and value = 10
+: identity = 3070469140 , type = <class 'tuple'> , and value = (1, 2, 3)
+
+A function definition introduces the function name into the current symbol table.
+The function can be assigned to a new name with =fnew=f=.
+The =return= statement returns a value from a function.
+Functions that don't explicitly return a value still return the Python special value =None=.
+A =method= is a function that belongs to an object and is called with dot notation, as in =obj.methodname()=.
+It is possible to define your own objects and methods using classes.
+-------
+Here we review *More on Defining Functions*.
+There are three forms that can be used to define functions with a variable number of arguments.
+The most useful is to specify a default value for one or more arguments.
+This creates a function that can be called with fewer arguments.
+Note that the default values are evaluated at the point of function definition in the /defining/ scope.
+#+BEGIN_SRC python :results output :exports both
+i = 5
+def f(arg=i):
+    print(arg)
+i = 6
+f() # returns value determined from defining scope
+#+END_SRC
+
+#+RESULTS:
+: 5
+
+And also worth noting is that the default is only evaluated once, so if it is a mutable quantity it could change over subsequent calls, as shown in the example below.
+#+BEGIN_SRC python :results output :exports both
+def f(a, L=[]):
+    L.append(a)
+    return L
+print(f(1)) # L starts as empty ang gets 1 added
+print(f(2)) # L already has 1, and 2 gets added
+print(f(3)) # And now 3 gets added
+#+END_SRC
+
+#+RESULTS:
+: [1]
+: [1, 2]
+: [1, 2, 3]
+
+If you don't want the default value to be shared between calls, here is a solution (FIXME I can't really follow why this works).
+
+#+BEGIN_SRC python :results output :exports both
+def f(a, L=None):
+    if L is None:
+        L = []
+    L.append(a)
+    return L
+print(f(1))
+print(f(2))
+print(f(3))
+#+END_SRC
+
+#+RESULTS:
+: [1]
+: [2]
+: [3]
+
+Functions can also be called with /keyword arguments/ of the form =kwarg=value=.
+--------
+Pythonic *coding style* is described in [[http://www.python.org/dev/peps/pep-0008][PEP 8]].
+It promotes a readable and eye-pleasing coding style, including these important points.
+
+- Use 4-space indentation, and no tabs.
+- Wrap lines so that they don’t exceed 79 characters.
+- Use blank lines to separate functions and classes, and larger blocks of code inside functions.
+- When possible, put comments on a line of their own.
+- Use docstrings.
+- Use spaces around operators and after commas, but not directly inside bracketing constructs: a = f(1, 2) + g(3, 4).
+- Name your classes and functions consistently; the convention is to use CamelCase for classes and lower_case_with_underscores for functions and methods. Always use self as the name for the first method argument (see A First Look at Classes for more on classes and methods).
+- Don’t use fancy encodings if your code is meant to be used in international environments. Python’s default, UTF-8, or even plain ASCII works best in any case.
+- Likewise, don’t use non-ASCII characters in identifiers if there is only the slightest chance people speaking a different language will read or maintain the code.
+
+** Data Structures
