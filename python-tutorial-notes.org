@@ -337,7 +337,6 @@ for n in range(2, 10):
 : 9 equals 3 * 3
 
 When used with a =for= or =while= loop, the =else= clause has more in common with the =else= clause of a =try= statement which runs when control flows off the end of the =try= (except in the case of an exception, =return=, =continue=, or =break=).
-
 -------
 The =pass= statement does nothing, but can be used when a statement is required syntatically but the program requires no action.
 An example is in creating minimal classes, or as a reminder to implement some code later.
@@ -350,32 +349,10 @@ def initlog(*args):
 
 #+RESULTS:
 : None
-
 -------
 We use the keyword =def= in *Defining Functions*.
 It must be followed by the function name and the parenthesized list of formal parameters.
 The function body follows and is indented.
-The first statement in the function body can optionally be a string literal, which serves as the function's [[https://docs.python.org/3.4/tutorial/controlflow.html#tut-docstrings][documentation string]] or /docstring/.
-- First line should be short, concise summary, starting with a capital letter, ending with a period, and not using function name.
-- If more than one line, 2nd line is blank to visually separate.
-- This second section should be one or more paragraphs describing calling conventions, side effects, etc.
-- The Python parser does not strip indentation from multi-line string literals
-- The following shows the convention for indentation.
-#+BEGIN_SRC python :results output :exports both
-def my_function():
-    """Do nothing, but document it.
-
-    No, really, it doesn't do anything.
-    """
-    pass
-print(my_function.__doc__)
-#+END_SRC
-
-#+RESULTS:
-: Do nothing, but document it.
-: 
-:     No, really, it doesn't do anything.
-
 And here is an example function we will use.
 #+BEGIN_SRC python :results output :exports both
 def fib(n):    # write Fibonacci series up to n
@@ -438,8 +415,30 @@ It is possible to define your own objects and methods using classes.
 -------
 Here we review *More on Defining Functions*.
 There are three forms that can be used to define functions with a variable number of arguments.
+*** Default Argument Values
 The most useful is to specify a default value for one or more arguments.
-This creates a function that can be called with fewer arguments.
+This creates a function that can be called with fewer arguments than it is defined to allow.
+#+BEGIN_SRC python :results output :exports both
+def calc(op, x=4, y=5):
+    if op == '*':
+        print(x*y)
+    elif op == '+':
+        print(x+y)
+    elif op == '-':
+        print(x-y)
+    else:
+        print(x/y)
+# Can be called in one of three ways
+calc('*')        # giving only the mandatory argument
+calc('+', 1)     # giving one of the optional arguments
+calc('/', 25, 5) # giving all the arguments
+#+END_SRC
+
+#+RESULTS:
+: 20
+: 6
+: 5.0
+
 Note that the default values are evaluated at the point of function definition in the /defining/ scope.
 #+BEGIN_SRC python :results output :exports both
 i = 5
@@ -452,12 +451,12 @@ f() # returns value determined from defining scope
 #+RESULTS:
 : 5
 
-And also worth noting is that the default is only evaluated once, so if it is a mutable quantity it could change over subsequent calls, as shown in the example below.
+And also worth noting is that the default is only evaluated /once/, so if it is a mutable quantity it could change over subsequent calls, as shown in the example below.
 #+BEGIN_SRC python :results output :exports both
 def f(a, L=[]):
     L.append(a)
     return L
-print(f(1)) # L starts as empty ang gets 1 added
+print(f(1)) # L starts as empty and gets 1 added
 print(f(2)) # L already has 1, and 2 gets added
 print(f(3)) # And now 3 gets added
 #+END_SRC
@@ -485,8 +484,117 @@ print(f(3))
 : [2]
 : [3]
 
+*** Keyword Arguments
 Functions can also be called with /keyword arguments/ of the form =kwarg=value=.
---------
+This approach is very similar to the default argument case above except that the keyword is explicitly given.
+In a function call, keyword arguments must follow positional arguments, all keywords must match those given in the function definition, and their order does not matter.
+When a final formal parameter of the form =**name= is present, it receives a dictionary containing all keyword arguments (except those corresponding to a formal parameter).
+Formal parameters of the form =*name= receive a tuple containing the positional arguments beyond the formal parameter list (=*name= must occur before =**name=).
+#+BEGIN_SRC python :results output :exports both
+def cheeseshop(kind, *arguments, **keywords):
+    print("-- Do you have any", kind, "?")
+    print("-- I'm sorry, we're all out of", kind)
+    for arg in arguments:
+        print(arg)
+    print("-" * 40)
+    keys = sorted(keywords.keys())
+    for kw in keys:
+        print(kw, ":", keywords[kw])
+# Call function
+cheeseshop("Limburger", "It's very runny, sir.",
+           "It's really very, VERY runny, sir.",
+           shopkeeper="Michael Palin",
+           client="John Cleese",
+           sketch="Cheese Shop Sketch")
+#+END_SRC
+
+#+RESULTS:
+: -- Do you have any Limburger ?
+: -- I'm sorry, we're all out of Limburger
+: It's very runny, sir.
+: It's really very, VERY runny, sir.
+: ----------------------------------------
+: client : John Cleese
+: shopkeeper : Michael Palin
+: sketch : Cheese Shop Sketch
+
+*** Arbitrary Argument Lists
+The least frequently used approach is to specify that a function can be called with an arbitary number of arguments.
+Before this zero or more normal arguments may occur, and the arbitrary list will be wrapped in a tuple.
+If a formal parameter occurs after the =*args= parameter must be keyword-only.
+#+BEGIN_SRC python :results output :exports both
+def concat(*args, sep="/"):
+   print(sep.join(args))
+concat("earth", "mars", "venus")
+concat("earth", "mars", "venus", sep=".")
+#+END_SRC
+
+#+RESULTS:
+: earth/mars/venus
+: earth.mars.venus
+
+*** Unpacking Argument Lists
+When arguments are already in a list or tuple but need to be unpacked for a function call, the operator =*= can be used during the function call to unpack out the arguments.
+In the same way, dictionaries can be unpacked with the =**= operator.
+So =*= and =**= can be used in function definitions to accept tuples and dictionaries, or used on function calls to pass tuples or dictionaries to functions that otherwise did not allow for their use.
+Below is a simple example demonstrating this difference, and it appears to me that it is more flexible to use =*args= in the function definition because then you can write the code for an arbitrary number of parameters (if that is needed) whereas the other approach does not seem to allow that because the unpacking results in a fixed number of parameter and the code must know how to handle them.
+Finally, note that the tutorial says that =*name= receives a tuple, but really it is passed as =x1,x2,x3= and not as =(x1,x2,x3)=.
+#+BEGIN_SRC python :results output :exports both
+def f1(x, *args):
+    sum = x
+    for i in args:
+    	sum += i
+    return sum
+print('Result from function with *args definition =',f1(1,2,3,4))
+def f2(x1, x2, x3, x4):
+    return x1 + x2 + x3 + x4
+arg = [2,3,4]
+print('Result from unpacking arguments with *args =',f2(1,*arg))
+#+END_SRC
+
+#+RESULTS:
+: Result from function with *args definition = 10
+: Result from unpacking arguments with *args = 10
+
+*** Lambda Expressions
+The =lambda= keyword allows for small (single expression), anonymous functions.
+They are /syntatic sugar/ for a normal function definition.
+One use is to pass a small function as an argument.
+#+BEGIN_SRC python :results output :exports both
+pairs = [(1, 'one'), (2, 'two'), (3, 'three'), (4, 'four')]
+pairs.sort(key=lambda x: x[1])
+print(pairs)
+#+END_SRC
+
+#+RESULTS:
+: [(4, 'four'), (1, 'one'), (3, 'three'), (2, 'two')]
+
+*** Documentation Strings
+The first statement in the function body can optionally be a string literal, which serves as the function's [[https://docs.python.org/3.4/tutorial/controlflow.html#tut-docstrings][documentation string]] or /docstring/.
+- First line should be short, concise summary, starting with a capital letter, ending with a period, and not using function name.
+- If more than one line, 2nd line is blank to visually separate.
+- This second section should be one or more paragraphs describing calling conventions, side effects, etc.
+- The Python parser does not strip indentation from multi-line string literals
+- The following shows the convention for indentation.
+#+BEGIN_SRC python :results output :exports both
+def my_function():
+    """Do nothing, but document it.
+
+    No, really, it doesn't do anything.
+    """
+    pass
+print(my_function.__doc__)
+#+END_SRC
+
+#+RESULTS:
+: Do nothing, but document it.
+: 
+:     No, really, it doesn't do anything.
+
+*** Function Annotations
+Function annotations are optional, arbitrary metadata about user-defined functions.
+Annotations are stored in the =__annotations__= attribute of a function as a dictionary.
+*** Coding Style
 Pythonic *coding style* is described in [[http://www.python.org/dev/peps/pep-0008][PEP 8]].
 It promotes a readable and eye-pleasing coding style, including these important points.
 
