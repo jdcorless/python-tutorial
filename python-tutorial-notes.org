@@ -816,3 +816,106 @@ Here are some examples that show the rules in action (all statements are =True=)
 (1, 2, 3)             == (1.0, 2.0, 3.0)
 (1, 2, ('aa', 'ab'))   < (1, 2, ('abc', 'a'), 4)
 #+END_EXAMPLE
+
+** Modules
+A *Module* is a file containining Python definitions and statements.
+The file name is the module name with the suffix =.py=.
+Within the module, the name is available as the global variable =__name__=.
+For example, a file =fibo.py= can be imported with =import fibo= which creates a namespace where =fibo.function= accesses =function= within the fibo module.
+You can give a function a local name by =fib = fibo.fib=.
+Executable statements inside a module are only executed the first time the module is imported.
+Each module has its own private symbol table which is used as the global symbol table for all functions in the module (it is possible to access these as =modname.itemname=).
+
+It is customary to put all =import= statements at the beginning of a module.
+The variant =from fibo import fib1, fib2= imports names directly into the importing module namespace.
+To get all names in the module you can use =from fibo import *= (which imports all names except those beginning with an underscore (=_=).
+In general the practice of importing with the =*= is not recommended because it impacts code readability and can clobber items in the existing namespace.
+
+Since each module is loaded only once in an interactive session, if changes to a module need to be tested we need a way to reload.  This is provided by the =importlib= module.
+#+BEGIN_EXAMPLE
+import importlib
+import mylibrary
+# changes made to mylibrary
+importlib.reload(mylibrary)
+#+END_EXAMPLE
+
+When you run a module with =$ python fibo.py <arguments>= the code is executed by the =__name__= variable set to =​"__main__"​=.  So if you add the following code at the end of your module you can make your module (here assumed to contain an algorithm to compute the Fibonacci sequence) usable as a script as well as an importable module.
+#+BEGIN_SRC python
+if __name__ == "__main__":
+    import sys
+    fib(int(sys.argv[1]))
+#+END_SRC
+Then the command =$ python fib.py 50= will return the Fibonacci numbers from the command line.
+But if you run =import fib= from with the interpreter, the code in the =​"__main__"​= section will not run.
+This approach is often used to run the module for testing so that the =​"__main__"​= section has testing code.
+
+-------
+When a module is imported, the interpreter follows the *Module Search Path*.
+First the interpreter looks for a built-in module by that name, then it search a list of directories given by =sys.path=.
+The =sys.path= is initialized from the directory containing the input script (or the current directory if no script is given), [[https://docs.python.org/3.4/using/cmdline.html#envvar-PYTHONPATH][PYTHONPATH]], and then the installation-dependent default.
+After initialization the =sys.path= variable can be modified, usually by putting the desired directory at the beginning of the search path.
+-------
+To speed up loading Python saves compiled versions of modules in the =__pycache__= directory with the name =module.version.pyc= where version is the Python version (e.g. =cpython-34=). 
+The compiled modules are platform indepedent.
+-------
+Python comes with a library of *Standard Modules* described in the [[https://docs.python.org/3.4/library/index.html][Python Library Reference]].
+Some modules are built into the interpreter, though which ones depends on the platform and the configuration.
+The =sys= module has variables =sys.ps1= and =sys.ps2= that give the primary and secondary prompts, while =sys.path= is a list object which determines the interpreters search path.
+-------
+The =dir()= function returns a sorted list of names (variables, modules, functions, etc.) a module defines.
+Without arguments it lists all names that are currently defined, but does not list names of built-in functions or variables.
+To access these, import the =builtins= module then run =dir(builtins)=.
+-------
+*Packages* are a way of structuring Python's module namespace using "dotted module names", such as =A.B= for a submodule =B= in package =A=.
+As an example, consider the design of a package to handle sound files and data.
+The following examples shows a possible structure for the package (which is to include code to analyze different sound file formats, sound effects, filters, etc.).
+
+#+BEGIN_EXAMPLE
+sound/                          Top-level package
+      __init__.py               Initialize the sound package
+      formats/                  Subpackage for file format conversions
+              __init__.py
+              wavread.py
+              wavwrite.py
+              aiffread.py
+              aiffwrite.py
+              auread.py
+              auwrite.py
+              ...
+      effects/                  Subpackage for sound effects
+              __init__.py
+              echo.py
+              surround.py
+              reverse.py
+              ...
+      filters/                  Subpackage for filters
+              __init__.py
+              equalizer.py
+              vocoder.py
+              karaoke.py
+              ...
+#+END_EXAMPLE
+
+The =__init__.py= file are required so Python treats the directories as containing packages.
+This file can be empty, or it can execute initialization code for the package or set the =__all__= variable.
+Individual modules of the package can be imported like =import sound.effects.echo= (which then would need to be referenced by its full name).
+If imported like =from sound.effects import echo= then an individual function would be referenced like =echo.echofilter=.
+And finally, a statement like =from sound.effects.echo import echofilter= would load the submodule and bring the function in directly.
+Note that for the syntax =from package import item= the =item= can be a submodule (or subpackage) of the package, or some other name defined in the package (like a function, class, or variable).
+For the syntax =import item.subitem.subsubitem= requires that each item except for the last be a package, and the last item can be a module or a package but can't be a class, function, or variable defined in the previous item.
+
+The packages that are imported when an =from module import *= can be defined in the =__init__.py= file with the =__all__= list variable.
+The import statement will then import the submodules named in that variable and it is up to the module author to keep that up-to-date.
+If =__all__= is not defined, the =import= statement above does /not/ import all submodules from the package, it only ensures that the names defined in the package are imported (and any initialization code in =__init__.py= is run).
+Generally speaking, the =import *= approach is considered bad practice in production code.
+
+For intra-package references, you can use either absolute imports, like =from sound.effects import echo=, or you can use relative imports using dot notation (similar to Linux filesystem referencing), like the following
+#+BEGIN_SRC python
+from . import echo
+from .. import formats
+from ..filters import equalizer
+#+END_SRC
+
+Packages also have the variable =__path__= which is initialized to be a list containing the name of the directory holding the package's =__init__.py=.
+
+
