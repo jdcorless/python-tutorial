@@ -14,9 +14,11 @@
 #+HTML_MATHJAX:
 #+LATEX_HEADER:
 
-These are my notes from the official Python tutorial for version 3.4.2.  They are not intended to be complete, because the tutorial is readily available, but it helps my memory to write this down and serves as a more personal reference for me.  A couple things to note...
+These are my notes from the official Python tutorial for version 3.4.2.
+They are not intended to be complete, because the tutorial is readily [[https://docs.python.org/3.4/tutorial/][available]], but it helps my memory to write this down and serves as a more personal reference for me.
+A couple things to note...
 
-- In some cases I have copied sentences directly from the tutorial
+- In many instances I have copied sentences and examples directly from the tutorial
 - The org-mode notes have some extra information that I chose not to export
 
 ** Whetting Your Appetite
@@ -918,4 +920,117 @@ from ..filters import equalizer
 
 Packages also have the variable =__path__= which is initialized to be a list containing the name of the directory holding the package's =__init__.py=.
 
+** Input and Output
+Ways of outputing values:
+1. Expression statements
+2. The =print()= function
+3. Using the =write()= method of file objects, where standard output can be referenced as =sys.stdout=
 
+Two ways to format output:
+1. String handling using slicing, concatenation, etc. to create layout
+2. The =str.format()= method
+
+Converting values to strings is handled by the =repr()= or =str()= functions.
+The =str()= function is meant to return human-readable representations, while =repr()= is meant more for the interpreter.
+Many values (numbers, lists, dictionaries) have the same representation using either function, while strings (for example) have distinct representations.
+Here are two ways to print out a table of numbers, the first method using the =str.rjust()= method for right justification (also available are =str.ljust()= and =str.center()=), and the second using the =str.format()= method.
+
+#+BEGIN_SRC python :results output :exports both
+for x in range(1, 6):
+    print(repr(x).rjust(2), repr(x*x).rjust(3), end=' ')
+    # Note use of 'end' on previous line
+    print(repr(x*x*x).rjust(4))
+print('-----------')
+for x in range(1, 6):
+    print('{0:2d} {1:3d} {2:4d}'.format(x, x*x, x*x*x))
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+ 1   1    1
+ 2   4    8
+ 3   9   27
+ 4  16   64
+ 5  25  125
+-----------
+ 1   1    1
+ 2   4    8
+ 3   9   27
+ 4  16   64
+ 5  25  125
+#+end_example
+
+The =str.zfill()= method will pad a numeric string on the left with zeros.
+
+Here are some examples of using the =str.format()= method, using both positional and keyword arguments.
+#+BEGIN_SRC python :results output :exports both
+print('We are the {} who say "{}!"'.format('knights', 'Ni'))
+print('{0} and {1}'.format('spam', 'eggs'))
+print('{1} and {0}'.format('spam', 'eggs'))
+print('This {food} is {adjective}.'.format(
+      food='spam', adjective='absolutely horrible'))
+print('The story of {0}, {1}, and {other}.'.format('Bill', 'Manfred',
+                                                       other='Georg'))
+#+END_SRC
+
+#+RESULTS:
+: We are the knights who say "Ni!"
+: spam and eggs
+: eggs and spam
+: This spam is absolutely horrible.
+: The story of Bill, Manfred, and Georg.
+
+='!a'= (apply =ascii()=), ='!s'= (apply =str()=) and ='!r'= (apply =repr()=) can be used to convert the value before it is formatted:
+#+BEGIN_SRC python :results output :exports both
+import math
+print('The value of PI is approximately {!r}.'.format(math.pi))
+#+END_SRC
+
+#+RESULTS:
+: The value of PI is approximately 3.141592653589793.
+
+An optional =:= and format specifier can follow the field name for greater control over formatting.
+
+#+BEGIN_SRC python :results output :exports both
+import math
+print('The value of PI is approximately {0:.3f}.'.format(math.pi))
+#+END_SRC
+
+#+RESULTS:
+: The value of PI is approximately 3.142.
+
+Passing an integer after the =:= will cause that field to be a minimum number of characters wide.
+#+BEGIN_SRC python :results output :exports both
+import math
+print('The value of PI = ({0:.3f})'.format(math.pi))
+print('The value of PI = ({0:8.3f})'.format(math.pi))
+#+END_SRC
+
+#+RESULTS:
+: The value of PI = (3.142)
+: The value of PI = (   3.142)
+
+-------
+In terms of *Reading and Writing Files*, =open()= returns a /file object/ most commonly used as =open(filename, mode)=.
+The mode can be read (=​'r'​=, assumed if omitted), write (=​'w'​=), append (=​'a'​=), read and write (=​'r+'​=).
+A (=​'b'​=) appended to the mode opens the file in binary mode (text mode is assumed by default).
+The file object method =f.read()= will read the entire file's contents, and if run as =f.read(size)= then =size= bytes are read and returned.
+=f.readline()= will read a single line leaving the newline character in the string.
+You can loop over a file objecct which is memory efficient, fast, and leads to simple code (i.e. =for line in f:=).
+Note that a simple way to read the file into a list is =list(f)= or =f.readlines()=.
+
+=f.write(str)= writes the contents of string to the file, returning the number of characters written (to write non-string items, convert to string first).
+
+=f.tell()= returns an integer giving the file object's current position in the file, and =f.seek()= can be used to change that position.
+When you are done with a file call =f.close()= to close it and free system resources.
+
+It is good practice to use the =with= keyword when dealing with file objects.
+This has the advantage of automatically closing the file after the completion even if an exception is raised (e.g. =with open('workfile', 'r') as f:=).
+
+-------
+Rather than writing code to save complicated data, saving structured data with *JSON* ([[http://json.org/][Javascript Object Notation]]) is possible with the =json= module.
+The module can take Python data hierarchies and convert them to string representations in a process called /serializing/.
+Reconstructing the data is called /deserializing/.
+For an object =x=, you can view its JSON string representation with =json.dumps(x)=, you can write it to a file object with =json.dump(x, f)=, and finally you can read it back with =x=json.load(f)=.
+This simple serialization technique can handle lists and dictionaries (more complicated structures require more effort).
+Note that *pickle* can serialize arbitrarily complex structures but creates a Python-specific result.
