@@ -1034,3 +1034,47 @@ Reconstructing the data is called /deserializing/.
 For an object =x=, you can view its JSON string representation with =json.dumps(x)=, you can write it to a file object with =json.dump(x, f)=, and finally you can read it back with =x=json.load(f)=.
 This simple serialization technique can handle lists and dictionaries (more complicated structures require more effort).
 Note that *pickle* can serialize arbitrarily complex structures but creates a Python-specific result.
+
+** Errors and Exceptions
+There are two types of errors: /syntax errors/ and /exceptions/.
+*** Syntax Errors
+The parser prints out the offending line with an arrow pointing at the earliest point in the line where the error was detected.
+#+BEGIN_EXAMPLE
+  File "<stdin>", line 1
+    while True print('Hello World')
+                   ^
+SyntaxError: invalid syntax
+#+END_EXAMPLE
+The error is caused by (or detected at) the token /preceding/ the arrow.
+Above the error is detected at the =print= because a colon is missing before it.
+*** Exceptions
+Errors detected during execution are called /exceptions/ and it is possible to "handle" them in the code if detected (more later), though most exceptions are not handled in code.
+Here's an example of an exception.
+#+BEGIN_EXAMPLE
+>>> 4 + spam*3
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'spam' is not defined
+#+END_EXAMPLE
+
+Exceptions come in different types (info on [[https://docs.python.org/3.4/library/exceptions.html#bltin-exceptions][built-in exceptions]] is linked), and the last line indicates what happened.
+The preceding part of the message includes context about where the error happened, in the form of a stack traceback.
+
+*** Handling Exceptions
+The following shows an example of handling an exception usig the =try= and =except= statements.
+#+BEGIN_SRC python :eval never
+while True:
+    try:
+        x = int(input("Please enter a number: "))
+        break
+    except ValueError:
+        print("Oops!  That was no valid number.  Try again...")
+#+END_SRC
+The =try= statement works as follows...
+- First the =try= clause is executed
+- If no exception occurs, the =except= clause is skipped and execution of the =try= clause is finished.
+- If an exception occurs during the =try= clause, the rest of the clause is skipped and if its type matches the except clause is executed, then execution continues after the =try= statement
+- If an exception occurs which does not match the =except= clause, it is passed on to outer =try= statements, and if not caught there then it is an /unhandled exception/ and execution stops
+A =try= statement may have more than one except clause (but at most one handler will be executed).
+An except clause may name several exceptions like =except (RuntimeError, TypeError, NameError):=.
+The last except clause may omit the exception name to serve as a wildcard.
