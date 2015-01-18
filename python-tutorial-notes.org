@@ -1061,7 +1061,7 @@ Exceptions come in different types (info on [[https://docs.python.org/3.4/librar
 The preceding part of the message includes context about where the error happened, in the form of a stack traceback.
 
 *** Handling Exceptions
-The following shows an example of handling an exception usig the =try= and =except= statements.
+The following shows an example of handling an exception using the =try= and =except= statements.
 #+BEGIN_SRC python :eval never
 while True:
     try:
@@ -1078,3 +1078,69 @@ The =try= statement works as follows...
 A =try= statement may have more than one except clause (but at most one handler will be executed).
 An except clause may name several exceptions like =except (RuntimeError, TypeError, NameError):=.
 The last except clause may omit the exception name to serve as a wildcard.
+The =try...except= statement has an optional =else= clause which must follow all =except= clauses, and is useful for code that must be executed if the =try= clause does not raise an exception.
+#+BEGIN_SRC python :eval never
+for arg in sys.argv[1:]:
+    try:
+        f = open(arg, 'r')
+    except IOError:
+        print('cannot open', arg)
+    else:
+        print(arg, 'has', len(f.readlines()), 'lines')
+        f.close()
+#+END_SRC
+The =else= clause can be used to isolate the portion of code to be tested in the =try= clause and then putting the remaining code in the =else= clause, as shown above.
+
+An =except= clause may specify a variable after the exception name which gets bound to an exception instance and can include information about the exception.
+
+#+BEGIN_SRC python :results output :exports both
+try:
+    1/0
+except ZeroDivisionError as var:
+    print(type(var))
+    print(var.args)
+    print(var)
+#+END_SRC
+
+#+RESULTS:
+: <class 'ZeroDivisionError'>
+: ('division by zero',)
+: division by zero
+
+*** Raising Exceptions
+The =raise= statement allows you to force a specified exception.
+The sole argument specifies the exception like =>>> raise NameError('HiThere')=.
+*** User-defined Exceptions
+You can create your own exceptions by defining a class that inherits from the =Exception= class.
+*** Defining Clean-up Actions
+The =try= statement has another optional clause, =finally=, which can define clean-up actions to be always be executed.
+#+BEGIN_SRC python :results output :exports both
+def divide(x, y):
+    try:
+        result = x / y
+    except ZeroDivisionError:
+        print("division by zero!")
+    else:
+        print("result is", result)
+    finally:
+        print("executing finally clause")
+divide(2, 1)
+divide(2, 0)
+#+END_SRC
+
+#+RESULTS:
+: result is 2.0
+: executing finally clause
+: division by zero!
+: executing finally clause
+
+*** Predefined Clean-up Actions
+The =with= statement allows objects like files to be used in a way that ensures the are always cleaned up.
+#+BEGIN_SRC python :eval never
+with open("myfile.txt") as f:
+    for line in f:
+        print(line, end="")
+#+END_SRC
+After execution, the file =f= is always closed, even if a problem occurs.
+The documentation will indicate if an object has a predefined clean-up.
+** Classes
