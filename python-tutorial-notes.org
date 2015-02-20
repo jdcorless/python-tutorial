@@ -30,7 +30,7 @@ print(sys.version)
 #+END_SRC
 
 #+RESULTS:
-: 3.4.2 |Continuum Analytics, Inc.| (default, Oct 21 2014, 17:40:08) 
+: 3.4.2 |Continuum Analytics, Inc.| (default, Oct 21 2014, 17:40:08)
 : [GCC 4.4.7 20120313 (Red Hat 4.4.7-1)]
 
 ** Using the Python Interpreter
@@ -155,7 +155,7 @@ Usage: thingy [OPTIONS]
 : Usage: thingy [OPTIONS]
 :      -h                        Display this usage message
 :      -H hostname               Hostname to connect to
-: 
+:
 
 Strings can be concatenated with the =*= and =+= operator, or just with a space (only works with literals, and is useful for breaking long strings).
 #+BEGIN_SRC python :results output :exports both
@@ -205,7 +205,7 @@ The =i:j= slice consists of characters between the edges labelled =i= and =j=.
  0   1   2   3   4   5   6
 -6  -5  -4  -3  -2  -1
 #+END_EXAMPLE
-Python strings cannot be changed, they are *immutable*. So, for instance, =​word[0] = 'a'​= will not work. 
+Python strings cannot be changed, they are *immutable*. So, for instance, =​word[0] = 'a'​= will not work.
 =len()= returns the length of a string (and lists).
 [[https://docs.python.org/3.4/library/stdtypes.html#string-methods][/String methods/]] are available, for example, as =word.lower()=, or =word.capitalize()=.
 The =printf()= style formatting is [[https://docs.python.org/3.4/library/stdtypes.html#old-string-formatting][available]] but can lead to errors, e.g. with tuples.
@@ -233,7 +233,7 @@ print('Slice assgined     =',squares)
 : Appended squares   = [1, 4, 9, 25, 36]
 : Slide assgined     = [1, 'aa', 'bb', 25, 36]
 
-Lists can also be nested to create lists of lists. 
+Lists can also be nested to create lists of lists.
 -------
 *First Steps Towards Programming*
 At this point the tutorial gives a simple example for computing the Fibonacci sequence that highlights some elements of Python programming.
@@ -247,12 +247,12 @@ while b < 10:
 #+END_SRC
 
 #+RESULTS:
-: 1, 1, 2, 3, 5, 8, 
+: 1, 1, 2, 3, 5, 8,
 
 - /Multiple assignment/ is shown where multiple variables simultaneously are assigned new values. The right-hand side is evaluated first (from left-to-right) and then assignment takes place.
 - The =while= loops executes as long as the condition is true.  Like =C=, any non-zero integer value is true, zero is false.  A string, list, or any sequence can be used and will evaluate to True unless it is of zero length. The standard comparison operators (=<=, =>=, =<=​=, =>=​=, =​==​=, and =!=​=).
 - The /body/ of the =while= loop is indented, which is Python's way of grouping statements.  Each line in a basic block must be identically indented.
-- 
+-
 ** More Control Flow Tools
 Perhaps the most well known statement is the *if* statement.
 There can be zero or more =elif= parts and the =else= is optional.
@@ -289,7 +289,7 @@ for w in words:
 #+END_SRC
 
 #+RESULTS:
-: cat 3, window 6, defenestrate 12, 
+: cat 3, window 6, defenestrate 12,
 
 If you need to change an item in a sequence that you are iterating over, it is recommended that you iterate over a copy, which can be done with the simple =[:]= notation.
 #+BEGIN_SRC python :results output :exports both
@@ -370,7 +370,7 @@ fib(2000)
 #+END_SRC
 
 #+RESULTS:
-: 0 1 1 2 3 5 8 13 21 34 55 89 144 233 377 610 987 1597 
+: 0 1 1 2 3 5 8 13 21 34 55 89 144 233 377 610 987 1597
 
 The execution of a function introduces a new symbol table used for local variables of the function.
 Variable references first look in local symbol table, then local symbol tables of enclosing functions, then global symbol table, and finally in table of built-in names (sometimes called the LEGB rule for Local, Enclosing, Global, and Built-in).
@@ -590,7 +590,7 @@ print(my_function.__doc__)
 
 #+RESULTS:
 : Do nothing, but document it.
-: 
+:
 :     No, really, it doesn't do anything.
 
 *** Function Annotations
@@ -830,7 +830,7 @@ Each module has its own private symbol table which is used as the global symbol 
 
 It is customary to put all =import= statements at the beginning of a module.
 The variant =from fibo import fib1, fib2= imports names directly into the importing module namespace.
-To get all names in the module you can use =from fibo import *= (which imports all names except those beginning with an underscore (=_=).
+To get all names in the module you can use =from fibo import *= (which imports all names except those beginning with an underscore =_=).
 In general the practice of importing with the =*= is not recommended because it impacts code readability and can clobber items in the existing namespace.
 
 Since each module is loaded only once in an interactive session, if changes to a module need to be tested we need a way to reload.  This is provided by the =importlib= module.
@@ -857,7 +857,7 @@ First the interpreter looks for a built-in module by that name, then it search a
 The =sys.path= is initialized from the directory containing the input script (or the current directory if no script is given), [[https://docs.python.org/3.4/using/cmdline.html#envvar-PYTHONPATH][PYTHONPATH]], and then the installation-dependent default.
 After initialization the =sys.path= variable can be modified, usually by putting the desired directory at the beginning of the search path.
 -------
-To speed up loading Python saves compiled versions of modules in the =__pycache__= directory with the name =module.version.pyc= where version is the Python version (e.g. =cpython-34=). 
+To speed up loading Python saves compiled versions of modules in the =__pycache__= directory with the name =module.version.pyc= where version is the Python version (e.g. =cpython-34=).
 The compiled modules are platform indepedent.
 -------
 Python comes with a library of *Standard Modules* described in the [[https://docs.python.org/3.4/library/index.html][Python Library Reference]].
